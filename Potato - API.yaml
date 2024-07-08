@@ -1,0 +1,1015 @@
+openapi: 3.0.0
+info: 
+  title: Potato API
+  version: 0.0.1
+servers: 
+  - url: http://localhost:8080/potato-api/v1
+    description: dev. server
+  
+paths: 
+  /users:
+    post:
+      summary: Метод создания пользователя
+      tags:
+        - Users
+      operationId: createUser
+      requestBody: 
+        required: true
+        content: 
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserCreate"
+      responses: 
+        '200' :
+          description: Успешный ответ с созданным пользователем
+          content: 
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        '400':
+          description: Недопустимые значения или пустые поля
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Error'
+                  - type: object
+                    properties:
+                      code:
+                        type: integer
+                        example: 400
+                      message:
+                        type: string
+                        example: "Invalid data"
+    patch:
+      summary: Метод редактирования пользователя (Только ФИО, Дата рождения)
+      tags:
+        - Users
+      operationId: editUser
+      security:
+        - SessionAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdate"
+      responses:
+        '200':
+          description: Успешный ответ с обновленным пользователем
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Error'
+                  - type: object
+                    properties:
+                      code:
+                        type: integer
+                        example: 404
+                      message:
+                        type: string
+                        example: "User not found"
+        '400':
+          description: Недопустимые значения или пустые поля
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Error'
+                  - type: object
+                    properties:
+                      code:
+                        type: integer
+                        example: 400
+                      message:
+                        type: string
+                        example: "Invalid data"
+  /users/{user_id}:                    
+    get:
+      summary: Метод получения пользователя
+      tags:
+        - Users
+      operationId: getUser
+      security:
+        - SessionAuth: [ ]
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: UUID
+      responses: 
+        '200':
+          description: Успешный ответ с пользователем
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Error'
+                  - type: object
+                    properties:
+                      code:
+                        type: integer
+                        example: 404
+                      message:
+                        type: string
+                        example: "User not found"
+        '400':
+          description: Недопустимые значения или пустые поля
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Error'
+                  - type: object
+                    properties:
+                      code:
+                        type: integer
+                        example: 400
+                      message:
+                        type: string
+                        example: "Invalid data"
+  /sessions:
+    post:
+      summary: Метод создания сессии
+      tags:
+        - Sessions
+      operationId: createSession
+      requestBody: 
+        required: true
+        content: 
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthData"
+      responses: 
+        '200' :
+          description: Сессия успешно создана
+
+        '400':
+          description: Недопустимые значения или пустые поля
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Error'
+                  - type: object
+                    properties:
+                      code:
+                        type: integer
+                        example: 400
+                      message:
+                        type: string
+                        example: "Invalid data"
+        '401':
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Error'
+                  - type: object
+                    properties:
+                      code:
+                        type: integer
+                        example: 400
+                      message:
+                        type: string
+                        example: "Invalid data"
+                        
+  /sessions/{session_id}:                     
+    get:
+      summary: Метод получения сессии
+      tags:
+        - Sessions
+      operationId: getSession
+      security:
+        - SessionAuth: [ ]
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: UUID
+      responses: 
+        '200':
+          description: Успешный ответ с сессией
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+        '404':
+          description: Сессия не найдена
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Error'
+                  - type: object
+                    properties:
+                      code:
+                        type: integer
+                        example: 404
+                      message:
+                        type: string
+                        example: "Session not found"
+        '400':
+          description: Недопустимые значения или пустые поля
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Error'
+                  - type: object
+                    properties:
+                      code:
+                        type: integer
+                        example: 400
+                      message:
+                        type: string
+                        example: "Invalid data"       
+                        
+    patch:
+      summary: Метод выхода из сессии
+      tags:
+        - Sessions
+      operationId: leaveSession
+      security:
+        - SessionAuth: [ ]
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema: 
+            type: string
+            format: UUID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/Session"  
+                - type: object
+                  properties:
+                    status: 
+                      type: string
+                      enum:
+                        - active
+                        - expired
+                      default: expired 
+      responses: 
+        '200':
+          description: Успешный ответ с измененной сессией
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+        '404':
+          description: Сессия не найдена
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Error'
+                  - type: object
+                    properties:
+                      code:
+                        type: integer
+                        example: 404
+                      message:
+                        type: string
+                        example: "Session not found"
+        '400':
+          description: Недопустимые значения 
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Error'
+                  - type: object
+                    properties:
+                      code:
+                        type: integer
+                        example: 400
+                      message:
+                        type: string
+                        example: "Invalid data"       
+  /wallet:
+    get:
+      summary: Метод получения информации о кошельке
+      tags: 
+        - Wallet
+      operationId: getWallet
+      security:
+        - SessionAuth: [ ]
+      parameters:
+        - name: wallet_number
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses: 
+        '200':
+          description: Успешный ответ с информацией о кошельке
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Wallet"
+        '404':
+          description: Кошелек
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Error'
+                  - type: object
+                    properties:
+                      code:
+                        type: integer
+                        example: 404
+                      message:
+                        type: string
+                        example: "Wallet not found"
+        '400':
+          description: Недопустимые значения или пустые поля
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Error'
+                  - type: object
+                    properties:
+                      code:
+                        type: integer
+                        example: 400
+                      message:
+                        type: string
+                        example: "Invalid data"     
+  /invoices:
+    post:
+        summary: Метод создания счета на оплату
+        tags:
+          - Invoices
+        operationId: createInvoice
+        requestBody: 
+          required: true
+          content: 
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Invoice"
+        responses: 
+          '200' :
+            description: Успешный ответ с созданным счетом на оплату
+            content: 
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Invoice"
+          '400':
+            description: Недопустимые значения или пустые поля
+            content:
+              application/json:
+                schema:
+                  allOf:
+                    - $ref: '#/components/schemas/Error'
+                    - type: object
+                      properties:
+                        code:
+                          type: integer
+                          example: 400
+                        message:
+                          type: string
+                          example: "Invalid data"
+  /invoices/{number}:                        
+    patch:
+      summary: Метод оплаты / отмены счета
+      description: Оплата возможна, если receiverId == айди пользователя, Отмена возможна, если senderId == ид пользователя
+      tags:
+        - Invoices
+      operationId: payInvoice
+      security:
+        - SessionAuth: [ ]
+      parameters:
+        - name: number
+          in: path
+          required: true
+          schema: 
+            type: string
+            format: UUID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+                $ref: "#/components/schemas/InvoiceUpdate"
+      responses: 
+        '200':
+          description: Успешный ответ с измененным счетом на оплату
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Invoice'
+                  - type: object
+                    properties:
+                      status:
+                        type: string
+                        enum:
+                          - paid
+                          - unpaid
+                          - cancelled
+                        default: paid 
+        '404':
+            description: Счет на оплату не найден
+            content:
+              application/json:
+                schema:
+                  allOf:
+                    - $ref: '#/components/schemas/Error'
+                    - type: object
+                      properties:
+                        code:
+                          type: integer
+                          example: 404
+                        message:
+                          type: string
+                          example: "Invoice not found"
+        '400':
+            description: Недопустимые значения или пустые поля
+            content:
+              application/json:
+                schema:
+                  allOf:
+                    - $ref: '#/components/schemas/Error'
+                    - type: object
+                      properties:
+                        code:
+                          type: integer
+                          example: 400
+                        message:
+                          type: string
+                          example: "Invalid data"
+    get:
+      summary: Метод получения счета на оплату
+      tags:
+        - Invoices
+      operationId: getInvoiceById
+      security:
+        - SessionAuth: [ ]
+      parameters:
+        - name: number
+          in: path
+          required: true
+          schema: 
+            type: string
+            format: UUID
+      responses: 
+        '200':
+          description: Успешный ответ с запрошенным счетом на оплату
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Invoice'
+                  - type: object
+                    properties:
+                      status:
+                        type: string
+                        enum:
+                          - paid
+                          - unpaid
+                          - cancelled
+                        default: paid 
+        '404':
+            description: Счет на оплату не найден
+            content:
+              application/json:
+                schema:
+                  allOf:
+                    - $ref: '#/components/schemas/Error'
+                    - type: object
+                      properties:
+                        code:
+                          type: integer
+                          example: 404
+                        message:
+                          type: string
+                          example: "Invoice not found"
+        '400':
+            description: Недопустимые значения или пустые поля
+            content:
+              application/json:
+                schema:
+                  allOf:
+                    - $ref: '#/components/schemas/Error'
+                    - type: object
+                      properties:
+                        code:
+                          type: integer
+                          example: 400
+                        message:
+                          type: string
+                          example: "Invalid data"         
+                          
+  /invoices/issued:
+    get:
+      summary: Метод получения всех выставленных счетов
+      tags:
+        - Invoices
+      operationId: getIssuedInvoices
+      security:
+        - SessionAuth: [ ]
+      responses:
+        '200':
+          description: Успешный ответ с выставленными счетами
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Invoice"
+        '400':
+          description: Недопустимые значения или пустые поля
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Error'
+                  - type: object
+                    properties:
+                      code:
+                        type: integer
+                        example: 400
+                      message:
+                        type: string
+                        example: "Invalid data"
+  /invoices/received:
+    get:
+      summary: Метод получения всех полученных счетов к оплате
+      tags:
+        - Invoices
+      operationId: getReceivedInvoices
+      security:
+        - SessionAuth: [ ]
+      parameters:
+        - name: status
+          in: query
+          required: true
+          schema:
+            type: string
+            default: unpaid
+      responses:
+        '200':
+          description: Успешный ответ со списком оплаченных счетов к оплате
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Invoice"
+        '400':
+          description: Недопустимые значения или пустые поля
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Error'
+                  - type: object
+                    properties:
+                      code:
+                        type: integer
+                        example: 400
+                      message:
+                        type: string
+                        example: "Invalid data"
+  /transfers:
+    post:
+      summary: Метод создания перевода
+      tags:
+        - Transfers
+      operationId: createTransfer
+      security:
+        - SessionAuth: [ ]
+      requestBody: 
+        required: true
+        content: 
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transfer"
+      responses: 
+        '200' :
+          description: Успешный ответ с созданным счетом на оплату
+          content: 
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transfer"
+        '400':
+          description: Недопустимые значения или пустые поля
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Error'
+                  - type: object
+                    properties:
+                      code:
+                        type: integer
+                        example: 400
+                      message:
+                        type: string
+                        example: "Invalid data"
+                        
+    get:
+      summary: Метод получения истории денежных переводов
+      tags:
+        - Transfers
+      operationId: getTransferHistory
+      security:
+        - SessionAuth: [ ]
+      parameters:
+        - name: type
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - to_user
+              - to_service
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - paid
+              - unpaid
+        - name: receiver_id
+          in: query
+          required: false
+          schema:
+            type: string
+            format: UUID
+      responses:
+        '200':
+          description: Успешный ответ с историей денежных переводов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Transfer"
+        '400':
+          description: Недопустимые значения или пустые поля
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Error'
+                  - type: object
+                    properties:
+                      code:
+                        type: integer
+                        example: 400
+                      message:
+                        type: string
+                        example: "Invalid data"        
+  /transfers/{transfer_id}:
+    get: 
+      summary: Метод получения информации о переводе
+      tags: 
+        - Transfers
+      operationId: getTransferInfo
+      security:
+        - SessionAuth: [ ]
+      parameters:
+        - name: transferId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: UUID
+      responses:
+        '200':
+          description: Успешный ответ с запрошенным переводом
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Transfer'
+                  - type: object
+                    properties:
+                      status:
+                        type: string
+                        enum:
+                          - paid
+                          - unpaid
+                          - cancelled
+                        default: paid 
+        '404':
+            description: Счет на оплату не найден
+            content:
+              application/json:
+                schema:
+                  allOf:
+                    - $ref: '#/components/schemas/Error'
+                    - type: object
+                      properties:
+                        code:
+                          type: integer
+                          example: 404
+                        message:
+                          type: string
+                          example: "Transfer not found"
+        '400':
+            description: Недопустимые значения или пустые поля
+            content:
+              application/json:
+                schema:
+                  allOf:
+                    - $ref: '#/components/schemas/Error'
+                    - type: object
+                      properties:
+                        code:
+                          type: integer
+                          example: 400
+                        message:
+                          type: string
+                          example: "Invalid data"   
+components:
+  securitySchemes:
+    SessionAuth:
+      type: apiKey
+      in: header
+      name: sessionId
+  schemas:
+    User:
+      type: object
+      required:
+        - firstname
+        - lastname
+        - phone
+        - email
+        - birthday
+        - password
+      properties: 
+        firstname:
+          type: string
+          example: Олег
+          pattern: "^[А-Я][а-яА-Я]{0,49}$"
+        lastname:
+          type: string
+          example: Котов
+          pattern: "^[А-Я][а-яА-Я]{0,49}$"  
+        patronymic:
+          type: string
+          example: Игоревич
+          pattern: "^[А-Я][а-яА-Я]{0,49}$"  
+        phone:
+          type: string
+          example: 79609439077
+          pattern: "^7\\d{10}$"  
+        email:
+          type: string
+          example: example@mail.ru
+          pattern: "^([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\\.[a-zA-Z0-9_-]+)$"
+        birthday:
+          type: string
+          example: 1999-01-01
+          pattern: "^[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])$"
+        password:
+          type: string
+          example: 5f4dcc3b5aa765d61d8327deb882cf99
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        user_id:
+          type: string
+          format: UUID
+        walletNumber: 
+          type: integer
+    UserUpdate:
+      type: object
+      properties:
+        firstname:
+          type: string
+          example: Олег
+          pattern: "^[А-Я][а-яА-Я]{0,49}$"
+        lastname:
+          type: string
+          example: Котов
+          pattern: "^[А-Я][а-яА-Я]{0,49}$"
+        patronymic:
+          type: string
+          example: Игоревич
+          pattern: "^[А-Я][а-яА-Я]{0,49}$"
+        phone:
+          type: string
+          example: 79609439077
+          pattern: "^7\\d{10}$"
+        email:
+          type: string
+          example: example@mail.ru
+          pattern: "^([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\\.[a-zA-Z0-9_-]+)$"
+        birthday:
+          type: string
+          example: 1999-01-01
+          pattern: "^[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])$"
+    UserResponse:
+      type: object
+      properties:
+        firstname:
+          type: string
+          example: Олег
+          pattern: "^[А-Я][а-яА-Я]{0,49}$"
+        lastname:
+          type: string
+          example: Котов
+          pattern: "^[А-Я][а-яА-Я]{0,49}$"
+        patronymic:
+          type: string
+          example: Игоревич
+          pattern: "^[А-Я][а-яА-Я]{0,49}$"
+        phone:
+          type: string
+          example: 79609439077
+          pattern: "^7\\d{10}$"
+        email:
+          type: string
+          example: example@mail.ru
+          pattern: "^([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\\.[a-zA-Z0-9_-]+)$"
+        birthday:
+          type: string
+          example: 1999-01-01
+          pattern: "^[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])$"
+        userId:
+          type: string
+          format: UUID
+        walletNumber:
+          type: integer
+
+    UserCreate:
+      type: object
+      properties:
+        firstname:
+          type: string
+          example: Олег
+          pattern: "^[А-Я][а-яА-Я]{0,49}$"
+        lastname:
+          type: string
+          example: Котов
+          pattern: "^[А-Я][а-яА-Я]{0,49}$"
+        patronymic:
+          type: string
+          example: Игоревич
+          pattern: "^[А-Я][а-яА-Я]{0,49}$"
+        phone:
+          type: string
+          example: 79609439077
+          pattern: "^7\\d{10}$"
+        email:
+          type: string
+          example: example@mail.ru
+          pattern: "^([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\\.[a-zA-Z0-9_-]+)$"
+        birthday:
+          type: string
+          example: 1999-01-01
+          pattern: "^[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])$"
+    Session:
+        type: object
+        required: 
+          - userId
+        properties: 
+          userId:
+            type: integer
+            description: ID юзера, которому принадлежит сессия
+          sessionId:
+            type: integer
+          createDateTime:
+            type: string
+            format: date-time
+          expiredDateTime:
+            type: string 
+            format: date-time
+          status:
+            type: string
+            enum:
+              - active
+              - expired
+            default: active  
+    Wallet: 
+      type: object
+      required: 
+        - userId
+      properties:
+        number:
+          type: integer
+        balance: 
+          type: integer
+          minimum: 0
+          default: 100
+        userId:
+          type: string
+          format: UUID
+          description: ID юзера, которому принадлежит кошелек
+    InvoiceUpdate:
+      type: object
+      required:
+        - cost
+        - senderId
+        - receiverId
+      properties:
+        number:
+          type: string
+          format: UUID
+        status:
+          type: string
+          enum:
+            - paid
+            - unpaid
+            - cancelled
+    Invoice:
+      type: object
+      required:
+        - cost
+        - senderId
+        - receiverId
+      properties:
+        number:
+          type: string
+          format: UUID
+        cost:
+          type: integer
+          minimum: 0
+        senderId:
+          type: string
+          format: UUID
+        receiverId:
+          type: string
+          format: UUID
+        status:
+          type: string
+          enum:
+            - paid
+            - unpaid
+            - cancelled
+        comment:
+          type: string
+          maxLength: 250
+        createDateTime:
+          type: string
+          format: date-time
+    Transfer:
+      type: object
+      properties:
+        id:
+          type: string
+          format: UUID
+        createDateTime:
+          type: string
+          format: date-time
+        amount:
+          type: integer
+          minimum: 0
+        type:
+          type: string
+          enum: 
+            - toUser
+            - toService
+        receiverWalletNumber:
+          type: integer
+        senderWalletNumber:
+            type: integer
+        receiverPhoneNumber:
+          type: string
+          pattern: "^7\\d{10}$"
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+    AuthData:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
